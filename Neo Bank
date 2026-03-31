@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neo Bank | Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --dark: #1e272e;
+            --success: #00d2d3;
+            --danger: #ff7675;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #1e272e 0%, #2f3542 100%);
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        header {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Card de Saldo */
+        .balance-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .balance-card h2 { font-weight: 300; font-size: 0.9rem; opacity: 0.8; }
+        .balance-card .amount { font-size: 2.2rem; font-weight: 700; margin: 10px 0; }
+
+        /* Metas de Economia */
+        .goals-section { margin-bottom: 30px; }
+        .goal-bar {
+            background: rgba(0,0,0,0.2);
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .progress {
+            background: var(--success);
+            height: 100%;
+            width: 65%; /* Simulação */
+            transition: 0.5s;
+        }
+
+        /* Botão de Ação Rápida */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.4);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        /* Lista de Transações */
+        .transactions {
+            background: var(--glass);
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .transaction-info i {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 12px;
+            margin-right: 12px;
+        }
+
+        /* Modal Simples */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+        .modal-content {
+            background: #2f3542;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            background: #1e272e;
+            color: white;
+        }
+        .btn-save {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Neo <b>Bank</b> 💰</h1>
+    </header>
+
+    <div class="container">
+        <div class="balance-card">
+            <h2>Saldo Disponível</h2>
+            <div class="amount" id="main-balance">R$ 2.450,00</div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
+                <span style="color: var(--success);"><i class="fas fa-arrow-up"></i> +R$ 1.200</span>
+                <span style="color: var(--danger);"><i class="fas fa-arrow-down"></i> -R$ 450</span>
+            </div>
+        </div>
+
+        <div class="goals-section">
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                <span>Meta: Viagem de Férias</span>
+                <span>65%</span>
+            </div>
+            <div class="goal-bar"><div class="progress"></div></div>
+        </div>
+
+        <h3>Atividades Recentes</h3>
+        <div class="transactions" id="transaction-list">
+            <div class="transaction-item">
+                <div class="transaction-info">
+                    <i class="fas fa-burger-king text-warning"></i>
+                    <span>Ifood (Lazer)</span>
+                </div>
+                <span style="color: var(--danger);">- R$ 58,90</span>
+            </div>
+            <div class="transaction-item">
+                <div class="transaction-info">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Supermercado</span>
+                </div>
+                <span style="color: var(--danger);">- R$ 210,00</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="fab" onclick="toggleModal()">
+        <i class="fas fa-plus"></i>
+    </div>
+
+    <div id="modal">
+        <div class="modal-content">
+            <h3>Novo Gasto</h3>
+            <input type="number" id="val" placeholder="Valor R$">
+            <input type="text" id="desc" placeholder="Descrição (Ex: Uber)">
+            <select id="cat">
+                <option value="Lazer">Lazer</option>
+                <option value="Alimentação">Alimentação</option>
+                <option value="Transporte">Transporte</option>
+            </select>
+            <button class="btn-save" onclick="addExpense()">Lançar Gasto</button>
+            <button onclick="toggleModal()" style="background:transparent; color:gray; border:none; width:100%; margin-top:10px;">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function addExpense() {
+            const val = document.getElementById('val').value;
+            const desc = document.getElementById('desc').value;
+            const cat = document.getElementById('cat').value;
+
+            if(!val || !desc) return alert("Preencha os campos!");
+
+            const list = document.getElementById('transaction-list');
+            const newItem = document.createElement('div');
+            newItem.className = 'transaction-item';
+            newItem.innerHTML = `
+                <div class="transaction-info">
+                    <i class="fas fa-tag"></i>
+                    <span>${desc} (${cat})</span>
+                </div>
+                <span style="color: var(--danger);">- R$ ${parseFloat(val).toFixed(2)}</span>
+            `;
+            
+            list.prepend(newItem);
+            toggleModal();
+            
+            // Simulação de atualização de saldo
+            let currentBalance = 2450.00 - parseFloat(val);
+            document.getElementById('main-balance').innerText = `R$ ${currentBalance.toLocaleString('pt-BR')}`;
+        }
+    </script>
+</body>
+</html>
